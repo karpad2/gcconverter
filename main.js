@@ -154,7 +154,7 @@ function get_filename()
         add_line("'***Start***")
         mvm.forEach((element) => {add_line(element);});            
         add_line("'***Vege***");
-        add_line("END\r\n"+String.fromCharCode(parseInt(hexString,"0A")));
+        add_line("END\r\n"+String.fromCharCode(parseInt("0x0A")));
         
     }
 
