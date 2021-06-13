@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="">
+<meta name="author" content="">
+<title>CNC controller</title>
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/bootstrap.min.css">
+ <link rel="stylesheet" href="css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
+
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary" style="z-index: 2">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">GRBL interface</a>
+    </div>
+    <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li><button type="button" class="btn btn-default" style="margin: 10px;" onClick="window.open('/jscut/jscut.html','_blank'); return false;">Jscut CAM</button></li>
+          <li><button type="button" class="btn btn-default" style="margin: 10px;" id="sendReset">RESET (ctrl-x)</button></li>
+          <li><button type="button" class="btn btn-success" style="margin: 10px;" id="sendGrblHelp">help ($)</button></li>
+          <li><button type="button" class="btn btn-success" style="margin: 10px;" id="sendGrblSettings">settings ($$)</button></li>
+           <li><button type="button" class="btn btn-default" style="margin: 10px;" ><a id="qStatus" >0/0</a> lines</button></li>
+        </ul>
+    </div>
+    </nav>
+  
+  
+  <nav class="sidebar flex-xl-nowrap" style="z-index: 1;" >
+    
+<select id="choosePort" class="form-control" style="width: 300px">
+<option value="no">Select a serial port</option>
+</select>
+<ul class="nav nav-tabs nav-justified" role="tablist">
+<li id="mpA">Working Position</li>
+</ul>
+<div id="wPosition" style="align-content: center">
+<div id="wX" style="text-align: left; padding-left: 15px; margin: 4px; font-size: 30px; width: 190px; border: 1px solid #aaa; font-weight: bold;">X: 0.000</div>
+<div id="wY" style="text-align: left; padding-left: 15px; margin: 4px; font-size: 30px; width: 190px; border: 1px solid #aaa; font-weight: bold;">Y: 0.000</div>
+<div id="wZ" style="text-align: left; padding-left: 15px; margin: 4px; font-size: 30px; width: 190px; border: 1px solid #aaa; font-weight: bold;">Z: 0.000</div>
+</div>
+            <button type="button" class="btn btn-default" style="margin-top: 5px; align-content: center" id="sendZero">Zero Machine (G92)</button>
+<hr style="clear: both;" />
+
+
+<br />
+
+<select class="form-control" id="jogSpeed">
+<option value="1500">Feed Rate: 1500</option>
+<option selected value="1000">Feed Rate: 1000</option>
+<option value="500">Feed Rate: 500</option>
+<option value="100">Feed Rate: 100</option>
+<option value="5">Feed Rate: 5</option>
+</select>
+
+<select class="form-control" id="jogSize">
+<option value=".5">Distance: .1</option>
+<option value=".5">Distance: .5</option>
+<option value="1">Distance: 1</option>
+<option value="2">Distance: 2</option>
+<option selected value="5">Distance: 5</option>
+<option value="10">Distance: 10</option>
+<option value="30">Distance: 30</option>
+</select>
+  </nav>
+  <div id="wrapper" class="hidden-xs-down">
+
+    <div id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+          <li>
+          <div class="col-sm-3 .d-none .d-sm-block .d-md-none" >
+            <table class="table-borderless">
+              <tr><td></td><td><button type="button" id="xP" class="btn btn-primary " style="width: 30px;">&uarr; X</button></td><td></td><td><button type="button" id="zP" class="btn btn-primary btn-sm" style="width: 30px;">&uarr; Z</button></td></tr>
+              <tr><td><button type="button" id="yP" class="btn btn-primary " style="width: 30px;">&uarr; Y</button></td><td></td><td><button type="button" id="yM" class="btn btn-primary btn-sm" style="width: 30px;">&darr; Y</button></td><td></td></tr>
+              <tr><td></td><td><button type="button" id="xM" class="btn btn-primary" style="width: 30px;">&darr; X</button></td><td></td><td><button type="button" id="zM" class="btn btn-primary btn-sm" style="width: 30px;">&darr; Z</button></td></tr>
+            </table>
+          </li>  
+          </ul>
+            </div>
+    </div>
+
+
+
+  <div class="container">
+
+<div id="content" class="col-md container">
+  <div class="row">
+<div id="renderArea" class="col-md-6 col-lg-8 " style="width: 600px"></div>
+
+<div id="cbuttons"  class=".d-block .d-sm-none col-sm-3" >
+    <h2>Working Position</h2>
+    <div id="wPosition" style="align-content: center">
+        <div id="wX1" style="text-align: left; padding-left: 15px; margin: 4px; font-size: 30px; width: 190px; border: 1px solid #aaa; font-weight: bold;">X: 0.000</div>
+        <div id="wY1" style="text-align: left; padding-left: 15px; margin: 4px; font-size: 30px; width: 190px; border: 1px solid #aaa; font-weight: bold;">Y: 0.000</div>
+        <div id="wZ1" style="text-align: left; padding-left: 15px; margin: 4px; font-size: 30px; width: 190px; border: 1px solid #aaa; font-weight: bold;">Z: 0.000</div>
+        </div>
+  <table class="table-borderless">
+    <tr><td></td><td><button type="button" id="xP1" class="btn btn-primary " style="width: 30px;">&uarr; X</button></td><td></td><td><button type="button" id="zP1" class="btn btn-primary btn-sm" style="width: 30px;">&uarr; Z</button></td></tr>
+    <tr><td><button type="button" id="yP1" class="btn btn-primary " style="width: 30px;">&uarr; Y</button></td><td></td><td><button type="button" id="yM1" class="btn btn-primary btn-sm" style="width: 30px;">&darr; Y</button></td><td></td></tr>
+    <tr><td></td><td><button type="button" id="xM1" class="btn btn-primary" style="width: 30px;">&darr; X</button></td><td></td><td><button type="button" id="zM1" class="btn btn-primary btn-sm" style="width: 30px;">&darr; Z</button></td></tr>
+  </table>
+</div>
+<pre id="console" class="col-sm-9 col-md-6 col-lg-8"></pre>
+  </div>
+
+<textarea name="gcodes"  class="writebox col-md-6 col-lg-8" id="command"></textarea>
+  </div>
+  
+</div>
+    <nav id="footer" class="navbar fixed-bottom navbar-expand-sm navbar-dark bg-dark">
+        <div class="my-2 my-md-0 ">
+        <span style="font-style: italic; color:white">Drag a .gcode or .nc file to the command box or click Upload GCODE to upload it.</span>
+        </div>
+        
+        <div class="input-group" style="clear: both; width: 300px; float: right; text-align: right; margin-top: 10px;">
+        <span class="input-group-btn">
+
+        <button type="button" class="btn btn-primary" id="pause">Pause</button>
+        <button type="button" class="btn btn-primary disabled" id="clearQ">Clear Queue</button>
+        </span>
+        </div>
+        
+        <div style="clear: both; float: right; margin-top: 10px;">
+        <span class="btn btn-primary btn-file">Upload GCODE <input type="file" id="fileInput" /></span>
+        <button type="button" class="btn btn-primary" id="sendCommand">Send to CNC (shift+enter)</button>
+        </div>
+      </nav>
+
+    <script src="js/jquery-3.3.1.slim.min.js" ></script>
+    <script src="js/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="js/bootstrap-material-design.js" integrity="sha384-CauSuKpEqAFajSpkdjv3z9t8E7RlpJ1UP0lKM/+NdtSarroVKu069AlsRPKkFBz9" crossorigin="anonymous"></script>
+    <!-- v68 Three.js -->
+    <script src="gcode-viewer/Three.js"></script>
+    <script src="gcode-viewer/TrackballControls.js"></script>
+    <script src="gcode-viewer/gcode-parser.js"></script>
+    <script src="gcode-viewer/gcode-model.js"></script>
+    <script src="gcode-viewer/renderer.js"></script>
+    <script src="gcode-viewer/ui.js"></script>
+    <script src="/socket.io/socket.io.js"></script> <!--Socket io join part-->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/main.js"></script>
+
+</body>
+</html>
